@@ -33,15 +33,16 @@ function build_deck() {
 
 // This is used to find the occurence of an element in an array
 function count_occurence(item, array) {
-  var result = array.includes(item);
+  var arr = array.slice(0)
+  var result = arr.includes(item);
   var n = array.length
   // Removes it from the array if it exists within it
   if (result) {
-    while (array.includes(item)) {
-      var a = array.indexOf(item);
-      array.splice(a,1);
+    while (arr.includes(item)) {
+      var a = arr.indexOf(item);
+      arr.splice(a,1);
   };
-    n -= array.length;
+    n -= arr.length;
   } else { n = 0; };
   // Returns the number of occurences as n
   return n;
@@ -69,21 +70,27 @@ function rank_hand(hand) {
   var suits = [];
   var newHand = [];
   var occurences = [];
+
+  //Test for Flush
   for (i=0;i<hand.length;i++){
     var s = String(hand[i]);
     suits.push(s.slice(-1));
     newHand.push(Number(s.slice(0-s.length,s.length-1))); };
+
   for (var i=0;i<4;i++){
-  var kind = cards.kinds[i]
-  var count = count_occurence(kind, suits)
-  console.log(cards.kinds[i] + ' => ' + count);
-  occurences.push(count);
-  };
-  console.log(occurences);
-  if (occurences[highestIndex(occurences)]>4) {
-    console.log('Flush')
+    var kind = cards.kinds[i]
+    var count = count_occurence(kind, suits)
+    occurences.push(count);
   };
 
+  function isFlush(arr) {
+    if (arr[highestIndex(arr)] > 4) {
+      return 'Flush'
+    }
+    return 'No Flush';
+  };
+
+  //Test for Straight
   const isStraight = a => {
     const uniq = a.filter((val, idx) => a.indexOf(val) === idx);
     uniq.sort((a, b) => a-b);
@@ -93,8 +100,32 @@ function rank_hand(hand) {
         return 'Straight';
       }
     }
-    return '';
+    return 'No Straight';
   }
+
+  //Test for Pairs
+  function Pairs(arr) {
+    arr.sort(function(a,b){return a-b});
+    for (var i=0; i<arr.length; i++){
+
+      if (count_occurence(arr[i],arr) > 1) {
+        i+=1
+        if (count_occurence(arr[i],arr) == 2) {
+          console.log(`Two Pair of ${arr[i]}`);
+        } else if (count_occurence(arr[i],arr) == 3) {
+          console.log(`Three of a kind of ${arr[i]}`);
+        } else if (count_occurence(arr[i], arr) == 4) {
+          console.log(`Four of a kind of ${arr[i]}`);
+        }
+      }
+    }
+  }
+
+
+  //Run Tests
+  console.log(newHand.sort(function(a,b){return a-b}));
+  Pairs(newHand);
+  console.log(isFlush(occurences));
   console.log(isStraight(newHand));
 };
 
@@ -118,13 +149,9 @@ function deal_cards(hand) {
   console.log(deck.length);
   return hand
 }
-build_deck();
-//console.log(cards.deck.length);
-//console.log(cards.deck.join(' '));
-deal_cards(player.hand);
-//console.log(cards.deck.length);
-console.log(table.cards);
 
-//console.log(cards.kinds);
+build_deck();
+deal_cards(player.hand);
+console.log(table.cards);
 console.log(player.hand);
 rank_hand(player.hand.concat(table.cards));
